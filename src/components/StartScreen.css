@@ -1,0 +1,63 @@
+/* Bu dosya, StartScreen.tsx component'inin stillerini içerir.
+ 
+*/
+
+.start-screen-container {
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px; /* p-8 */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  .start-screen-title {
+    font-size: 3rem; /* text-5xl */
+    font-weight: 700; /* font-bold */
+    margin-bottom: 24px; /* mb-6 */
+  
+    background-image: linear-gradient(to right, #C084FC, #EC4899); /* from-purple-400 to-pink-600 */
+    
+    background-clip: text;
+    -webkit-background-clip: text; /* Safari/Chrome için */
+    color: transparent;
+  }
+  
+  .start-screen-description {
+    font-size: 1.125rem; /* text-lg */
+    color: #D1D5DB; /* text-gray-300 
+    margin-bottom: 32px; /* mb-8 */
+    max-width: 42rem; /* max-w-2xl */
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.75; 
+  }
+  
+  .start-screen-button {
+    background-color: #9333EA; /* bg-purple-600 */
+    color: white;
+    font-weight: 700; /* font-bold */
+    padding-top: 12px;    /* py-3 */
+    padding-bottom: 12px; /* py-3 */
+    padding-left: 32px;   /* px-8 */
+    padding-right: 32px;  /* px-8 */
+    border-radius: 8px; /* rounded-lg */
+    font-size: 1.25rem; /* text-xl */
+    
+    /* Geçiş (transition) efektleri */
+    transition-property: background-color, transform, box-shadow;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+    
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+    border: none;
+    cursor: pointer;
+  }
+  
+  .start-screen-button:hover {
+    background-color: #7E22CE; /* hover:bg-purple-700 */
+    transform: scale(1.05); /* hover:scale-105 */
+  }
+  
