@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import StartScreen from "./components/StartScreen.tsx";
+import StartScreen from "./components/StartScreen";
+import GameScreen from "./components/GameScreen";
 
 const App: React.FC = () => {
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -8,16 +9,16 @@ const App: React.FC = () => {
     setIsGameStarted(true);
   };
 
+  const handleExitGame = () => {
+    setIsGameStarted(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {!isGameStarted ? (
         <StartScreen onStartGame={handleStartGame} />
       ) : (
-        <div className="flex items-center justify-center min-h-screen">
-          <h2 className="text-3xl font-bold text-green-400">
-            🎮 Oyun başladı! (Buraya oyun componenti gelecek)
-          </h2>
-        </div>
+        <GameScreen onExit={handleExitGame} />
       )}
     </div>
   );
