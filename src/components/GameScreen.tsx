@@ -1,100 +1,280 @@
 import React, { useState, useEffect } from "react";
+import { generateRound } from "../data/gameModes";
+import type { GameMode } from "../data/gameModes";
+import "./GameScreen.css";
 
 interface GameScreenProps {
   onExit: () => void;
-  playerName?: string; // İsim opsiyonel olarak eklenebilir
+  onBackToMode?: () => void;
+  gameMode?: GameMode;
+  playerName?: string;
 }
 
-const GameScreen: React.FC<GameScreenProps> = ({ onExit, playerName = "Oyuncu" }) => {
-  // Örnek oyun durumu (State)
+const GameScreen: React.FC<GameScreenProps> = ({
+  onExit,
+  onBackToMode,
+  gameMode,
+  playerName = "Oyuncu"
+}) => {
+  // Oyun durumu
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(60);
-  const [isActive, setIsActive] = useState(true);
+  const [round, setRound] = useState(1);
+  const [currentRound, setCurrentRound] = useState<{ images: any[], aiIndex: number } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [gameFinished, setGameFinished] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
+  const [hintsShown, setHintsShown] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(gameMode?.difficulty.timeLimit || 60);
+  const [gameActive, setGameActive] = useState(true);
 
-  // Basit bir zamanlayıcı efekti (Oyun süresi simülasyonu)
+  // İlk round'u oluştur
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (isActive && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false); // Süre bitti
+    if (gameMode) {
+      setCurrentRound(generateRound(gameMode.category.id));
+      setTimeLeft(gameMode.difficulty.timeLimit);
     }
-    return () => clearInterval(timer);
-  }, [isActive, timeLeft]);
+  }, [gameMode, round]);
 
-  // Skoru artırmak için örnek fonksiyon (Oyun mantığın buraya gelecek)
-  const handleGameAction = () => {
-    if (isActive) {
-      setScore((prev) => prev + 10);
+  // Zamanlayıcı
+  useEffect(() => {
+    if (!gameActive || gameFinished) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setGameActive(false);
+          setGameFinished(true);
+          setResultMessage("⏰ Süre doldu! Oyun bitti.");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameActive, gameFinished]);
+
+  // Görsel seçimi
+  const selectImage = (index: number) => {
+    if (selectedImage !== null || gameFinished) return;
+
+    setSelectedImage(index);
+    const isCorrect = index === currentRound?.aiIndex;
+
+    if (isCorrect) {
+      const points = Math.round(100 * (gameMode?.difficulty.pointsMultiplier || 1));
+      setScore(prev => prev + points);
+      setResultMessage(`🎉 Doğru! ${points} puan kazandın!`);
+    } else {
+      setResultMessage("❌ Yanlış! AI görseli gösteriliyor.");
+    }
+
+    setGameFinished(true);
+  };
+
+  // İpucu göster
+  const showHint = () => {
+    if (!gameMode?.difficulty.hintsEnabled || hintsShown >= 2) return;
+    setHintsShown(prev => prev + 1);
+  };
+
+  // Yeni round başlat
+  const nextRound = () => {
+    const maxRounds = gameMode?.difficulty.rounds || 5;
+    if (round < maxRounds) {
+      setRound(prev => prev + 1);
+      setSelectedImage(null);
+      setGameFinished(false);
+      setResultMessage("");
+      setHintsShown(0);
+      setTimeLeft(gameMode?.difficulty.timeLimit || 60);
+      setGameActive(true);
+    } else {
+      setResultMessage(`🏆 Oyun tamamlandı! Toplam skor: ${score}`);
     }
   };
 
+  // Oyunu yeniden başlat
+  const restartGame = () => {
+    setScore(0);
+    setRound(1);
+    setSelectedImage(null);
+    setGameFinished(false);
+    setResultMessage("");
+    setHintsShown(0);
+    setTimeLeft(gameMode?.difficulty.timeLimit || 60);
+    setGameActive(true);
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-      {/* --- HUD (Üst Bilgi Paneli) --- */}
-      <div className="w-full max-w-4xl flex justify-between items-center bg-gray-800 p-4 rounded-xl shadow-lg border-b-4 border-green-500 mb-8">
-        <div className="flex flex-col">
-          <span className="text-xs text-gray-400 uppercase tracking-widest">Oyuncu</span>
-          <span className="font-bold text-xl text-green-400">{playerName}</span>
+    <div className="game-screen">
+      {/* HUD */}
+      <div className="game-hud">
+        <div className="hud-item">
+          <span className="hud-label">Oyuncu</span>
+          <span className="hud-value">{playerName}</span>
         </div>
 
-        <div className="flex flex-col items-center">
-          <span className="text-xs text-gray-400 uppercase tracking-widest">Süre</span>
-          <span className={`font-mono text-3xl font-bold ${timeLeft < 10 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
-            00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
+        <div className="hud-item">
+          <span className="hud-label">Kategori</span>
+          <span className="hud-value">{gameMode?.category.name || 'Genel'}</span>
+        </div>
+
+        <div className="hud-item">
+          <span className="hud-label">Round</span>
+          <span className="hud-value">{round}/{gameMode?.difficulty.rounds || 5}</span>
+        </div>
+
+        <div className="hud-item">
+          <span className={`hud-label ${timeLeft < 10 ? 'danger' : timeLeft < 30 ? 'warning' : ''}`}>Süre</span>
+          <span className={`hud-value timer ${timeLeft < 10 ? 'danger' : timeLeft < 30 ? 'warning' : ''}`}>
+            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
           </span>
         </div>
 
-        <div className="flex flex-col items-end">
-          <span className="text-xs text-gray-400 uppercase tracking-widest">Skor</span>
-          <span className="font-mono text-3xl font-bold text-yellow-400">{score}</span>
+        <div className="hud-item">
+          <span className="hud-label">Skor</span>
+          <span className="hud-value score">{score}</span>
         </div>
       </div>
 
-      {/* --- OYUN ALANI (Game Board) --- */}
-      <div className="relative w-full max-w-4xl h-96 bg-gray-950 rounded-2xl border-2 border-dashed border-gray-700 flex flex-col items-center justify-center shadow-2xl overflow-hidden group">
-        
-        {/* Arka plan ızgara efekti (Opsiyonel görsel) */}
-        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      {/* Oyun Alanı */}
+      <div className="game-area">
+        {!gameFinished ? (
+          <>
+            {/* Görsel Seçenekleri */}
+            {currentRound && (
+              <div className="images-container">
+                {currentRound.images.map((image: any, index: number) => (
+                  <div
+                    key={image.id}
+                    onClick={() => selectImage(index)}
+                    className={`game-image-card ${
+                      selectedImage === index
+                        ? index === currentRound.aiIndex
+                          ? 'correct'
+                          : 'incorrect'
+                        : selectedImage !== null && index === currentRound.aiIndex
+                        ? 'correct'
+                        : ''
+                    }`}
+                  >
+                    <img
+                      src={image.url}
+                      alt={`Option ${index + 1}`}
+                      className="game-image"
+                    />
+                    {selectedImage !== null && index === currentRound.aiIndex && (
+                      <div className="ai-badge correct">AI ÜRETİMİ</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
-        {isActive ? (
-          <div className="z-10 text-center">
-            <p className="text-gray-400 mb-4 animate-bounce">Oyun Alanı</p>
-            {/* BURAYA SENİN OYUN MANTIĞIN GELECEK */}
-            <button
-              onClick={handleGameAction}
-              className="px-8 py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] transition active:scale-95"
-            >
-              PUAN KAZAN (TEST)
-            </button>
-          </div>
+            {/* Talimat */}
+            {selectedImage === null && (
+              <div className="instruction-section">
+                <h2 className="instruction-title">
+                  🤖 AI mı Değil mi? ({gameMode?.category.name})
+                </h2>
+                <p className="instruction-subtitle">
+                  Üç görsel arasından hangisinin yapay zeka tarafından üretildiğini bulun!
+                </p>
+                <div className="text-sm text-gray-300 mt-4">
+                  Zorluk: {gameMode?.difficulty.name} | Puan çarpanı: {gameMode?.difficulty.pointsMultiplier}x
+                </div>
+              </div>
+            )}
+
+            {/* İpucu Sistemi */}
+            {gameMode?.difficulty.hintsEnabled && selectedImage === null && hintsShown < 2 && (
+              <div className="hint-section">
+                <button
+                  onClick={showHint}
+                  className="hint-button"
+                  disabled={hintsShown >= 2}
+                >
+                  💡 İpucu Al ({2 - hintsShown} kaldı)
+                </button>
+              </div>
+            )}
+
+            {/* Gösterilen ipucu */}
+            {hintsShown > 0 && (
+              <div className="hint-section">
+                <h3 className="hint-title">💡 İpucu #{hintsShown}</h3>
+                <p className="hint-text">
+                  {currentRound?.images.find(img => img.isAi)?.hintText || 'Detaylara dikkat et!'}
+                </p>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="z-10 flex flex-col items-center">
-            <h3 className="text-3xl font-bold text-red-500 mb-2">Oyun Bitti!</h3>
-            <p className="text-xl">Toplam Skor: {score}</p>
+          /* Sonuç Ekranı */
+          <div className="result-screen">
+            <h2 className="result-title">
+              {resultMessage}
+            </h2>
+
+            {round >= (gameMode?.difficulty.rounds || 5) && (
+              <>
+                <p className="result-message">🎉 Tebrikler! Tüm turları tamamladın!</p>
+                <div className="result-stats">
+                  <div className="result-stat">
+                    <span className="result-stat-value">{score}</span>
+                    <span className="result-stat-label">Toplam Skor</span>
+                  </div>
+                  <div className="result-stat">
+                    <span className="result-stat-value">{gameMode?.category.name}</span>
+                    <span className="result-stat-label">Kategori</span>
+                  </div>
+                  <div className="result-stat">
+                    <span className="result-stat-value">{gameMode?.difficulty.name}</span>
+                    <span className="result-stat-label">Zorluk</span>
+                  </div>
+                  <div className="result-stat">
+                    <span className="result-stat-value">{gameMode?.difficulty.pointsMultiplier}x</span>
+                    <span className="result-stat-label">Çarpan</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="result-buttons">
+              {round < (gameMode?.difficulty.rounds || 5) ? (
+                <button onClick={nextRound} className="result-button primary">
+                  ➡️ Sonraki Tur ({round + 1}/{gameMode?.difficulty.rounds || 5})
+                </button>
+              ) : (
+                <>
+                  <button onClick={restartGame} className="result-button primary">
+                    🔄 Tekrar Oyna
+                  </button>
+                  {onBackToMode && (
+                    <button onClick={onBackToMode} className="result-button secondary">
+                      ⚙️ Mod Değiştir
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* --- KONTROLLER --- */}
-      <div className="mt-8 flex gap-4">
-        <button
-          onClick={() => { setTimeLeft(60); setScore(0); setIsActive(true); }}
-          className="px-6 py-2 border border-gray-600 hover:bg-gray-800 text-gray-300 rounded-lg transition"
-        >
-          Yeniden Başlat
+      {/* Kontroller */}
+      <div className="game-controls">
+        <button onClick={restartGame} className="control-button">
+          🔄 Oyunu Sıfırla
         </button>
-
-        <button
-          onClick={onExit}
-          className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md transition flex items-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-          </svg>
-          Çıkış Yap
+        {onBackToMode && (
+          <button onClick={onBackToMode} className="control-button">
+            ⚙️ Mod Değiştir
+          </button>
+        )}
+        <button onClick={onExit} className="control-button danger">
+          🏠 Ana Menü
         </button>
       </div>
     </div>

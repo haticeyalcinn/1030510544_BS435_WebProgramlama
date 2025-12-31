@@ -1,0 +1,343 @@
+.mode-selection-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  padding: 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.mode-selection-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  max-width: 900px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mode-selection-title {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  color: #ffffff;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.selection-section {
+  margin-bottom: 3rem;
+  text-align: left;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: #e0e0e0;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+/* Options Grid - Kategoriler için */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.option-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  text-align: center;
+}
+
+.option-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.option-card.selected {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.option-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.option-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.option-card.selected .option-title {
+  color: #10b981;
+}
+
+.option-description {
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  line-height: 1.4;
+}
+
+.option-card.selected .option-description {
+  color: #ffffff;
+}
+
+/* Difficulty Grid - Zorluk için */
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.difficulty-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.difficulty-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.difficulty-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.difficulty-card:hover::before {
+  opacity: 1;
+}
+
+/* Zorluk renkleri */
+.difficulty-card.green:hover {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.difficulty-card.red:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.difficulty-card.selected {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.difficulty-card.selected.green {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.difficulty-card.selected.red {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.difficulty-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.difficulty-description {
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.difficulty-card.selected .difficulty-description {
+  color: #ffffff;
+}
+
+.difficulty-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  gap: 0.3rem;
+}
+
+.difficulty-card.selected .stat-item {
+  color: #ffffff;
+}
+
+.stat-icon {
+  font-size: 0.9rem;
+}
+
+/* Start Section */
+.start-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.selected-summary {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.selected-summary h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.selected-summary p {
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  margin-bottom: 0.3rem;
+}
+
+.start-game-button {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 25px;
+  padding: 1rem 2rem;
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.start-game-button:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+}
+
+.mode-back-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  padding: 0.8rem 2rem;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.mode-back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mode-selection-card {
+    padding: 2rem 1.5rem;
+    margin: 1rem;
+  }
+
+  .mode-selection-title {
+    font-size: 2.2rem;
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .difficulty-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .difficulty-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .mode-selection-container {
+    padding: 1rem;
+  }
+
+  .mode-selection-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .mode-selection-title {
+    font-size: 1.8rem;
+  }
+
+  .option-card, .difficulty-card {
+    padding: 1rem;
+  }
+
+  .start-section {
+    padding: 1.5rem;
+  }
+}
